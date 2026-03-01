@@ -14,6 +14,7 @@ from .scrub import SCRUBUnlearner
 from .retrain import RetrainUnlearner
 from .bad_teacher import BadTeacherUnlearner
 from .amnesiac import AmnesiacUnlearner
+from .salun import SalUnUnlearner
 
 __all__ = [
     'BaseUnlearner',
@@ -28,6 +29,7 @@ __all__ = [
     'RetrainUnlearner',
     'BadTeacherUnlearner',
     'AmnesiacUnlearner',
+    'SalUnUnlearner',
 ]
 
 

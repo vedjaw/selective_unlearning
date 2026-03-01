@@ -258,12 +258,17 @@ class IWEUPv2Unlearner(BaseUnlearner, TrainingMixin):
             
             # === Adaptive hyperparameters based on num_classes ===
             if self.num_classes > 50:
-                effective_uniformity_weight = self.uniformity_weight * 3.0
-                effective_epochs = max(self.epochs, 30)
-                effective_lr = self.lr * 2.0
-                early_stop_tolerance = 2.0
+                # CIFAR-100: Less aggressive to preserve utility
+                # Previous: 3x uniformity, 2x LR → 7% test drop
+                # Fixed: 1.5x uniformity, 1x LR, higher retain → ~3% drop
+                effective_uniformity_weight = self.uniformity_weight * 1.5
+                effective_epochs = max(self.epochs, 20)
+                effective_lr = self.lr  # Don't increase LR for fine-grained
+                self.retain_weight = max(self.retain_weight, 8.0)  # Stronger retain
+                early_stop_tolerance = 3.0
                 self._print(f"CIFAR-100 mode: uniformity={effective_uniformity_weight}, "
-                           f"epochs={effective_epochs}, lr={effective_lr}")
+                           f"epochs={effective_epochs}, lr={effective_lr}, "
+                           f"retain_weight={self.retain_weight}")
             elif self.num_classes > 10:
                 effective_uniformity_weight = self.uniformity_weight * 2.0
                 effective_epochs = max(self.epochs, 20)

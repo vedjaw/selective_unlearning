@@ -43,6 +43,7 @@ from src.unlearning import (
     RetrainUnlearner,
     BadTeacherUnlearner,
     AmnesiacUnlearner,
+    SalUnUnlearner,
 )
 from src.evaluation.metrics import compute_unlearning_metrics, UnlearningMetrics
 from src.evaluation.mia import shadow_model_mia
@@ -136,6 +137,10 @@ def get_unlearner(method: str, model, device: str, epochs: int, lr: float):
         )
     elif method == 'amnesiac':
         return AmnesiacUnlearner(
+            model, device=device, epochs=epochs, lr=lr
+        )
+    elif method == 'salun':
+        return SalUnUnlearner(
             model, device=device, epochs=epochs, lr=lr
         )
     else:
@@ -386,7 +391,7 @@ def main():
                        help='Random seeds to use')
     parser.add_argument('--methods', type=str, nargs='+',
                        default=['finetune', 'gradient_ascent', 'ssd', 'pgu', 'scrub',
-                                'bad_teacher', 'amnesiac', 'iweup_v2', 'retrain'])
+                                'bad_teacher', 'amnesiac', 'salun', 'iweup_v2', 'retrain'])
     parser.add_argument('--checkpoint', type=str,
                        default='checkpoints/cifar10_resnet18_original.pt')
     parser.add_argument('--unlearn_epochs', type=int, default=15)

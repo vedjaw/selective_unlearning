@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viva Presentation — Selective Machine Unlearning</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Crimson+Pro:wght@400;600;700&display=swap');
+
+        :root {
+            --primary: #1a365d;
+            --accent: #c53030;
+            --bg: #ffffff;
+            --text: #1a202c;
+            --muted: #4a5568;
+            --light: #f7fafc;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f1419;
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .slide {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            padding: 60px 80px;
+            background: var(--bg);
+            position: absolute;
+            top: 0;
+            left: 0;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        /* Title slide */
+        .slide.title-slide {
+            background: linear-gradient(135deg, #1a365d 0%, #2c5282 50%, #2b6cb0 100%);
+            color: white;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .slide.title-slide h1 {
+            font-family: 'Crimson Pro', serif;
+            font-size: 2.8em;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            max-width: 80%;
+        }
+
+        .slide.title-slide .subtitle {
+            font-size: 1.2em;
+            font-weight: 300;
+            opacity: 0.9;
+            margin-bottom: 40px;
+        }
+
+        .slide.title-slide .authors {
+            font-size: 1.0em;
+            opacity: 0.85;
+            margin-bottom: 8px;
+        }
+
+        .slide.title-slide .affiliation {
+            font-size: 0.9em;
+            opacity: 0.7;
+        }
+
+        .slide.title-slide .date {
+            font-size: 0.85em;
+            opacity: 0.6;
+            margin-top: 30px;
+        }
+
+        /* Section headers */
+        .slide-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 35px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--primary);
+        }
+
+        .slide-number {
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1em;
+            flex-shrink: 0;
+        }
+
+        .slide-header h2 {
+            font-family: 'Crimson Pro', serif;
+            font-size: 2em;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        /* Content */
+        .content {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .content ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .content ul li {
+            padding: 10px 0 10px 30px;
+            position: relative;
+            font-size: 1.15em;
+            line-height: 1.5;
+            color: var(--text);
+        }
+
+        .content ul li::before {
+            content: '▸';
+            position: absolute;
+            left: 5px;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .content ul li strong {
+            color: var(--primary);
+        }
+
+        .content ul li em {
+            color: var(--muted);
+            font-size: 0.9em;
+        }
+
+        /* Two-column layout */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            height: 100%;
+        }
+
+        .col h3 {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.3em;
+            color: var(--primary);
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .col ul li {
+            font-size: 1.0em;
+            padding: 6px 0 6px 25px;
+        }
+
+        /* Tables */
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95em;
+            margin-top: 10px;
+        }
+
+        .results-table th {
+            background: var(--primary);
+            color: white;
+            padding: 10px 14px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .results-table td {
+            padding: 8px 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .results-table tr:nth-child(even) {
+            background: var(--light);
+        }
+
+        .results-table tr.highlight {
+            background: #fff5f5;
+            font-weight: 600;
+        }
+
+        .results-table tr.highlight td {
+            color: var(--accent);
+        }
+
+        .results-table tr.gold {
+            background: #f0fff4;
+        }
+
+        /* Highlight box */
+        .highlight-box {
+            background: linear-gradient(135deg, #ebf8ff, #f0fff4);
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+            font-size: 1.05em;
+        }
+
+        .highlight-box.red {
+            background: linear-gradient(135deg, #fff5f5, #fffaf0);
+            border-left-color: var(--accent);
+        }
+
+        /* Progress bars */
+        .progress-item {
+            margin: 12px 0;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 1.0em;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: var(--border);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.5s;
+        }
+
+        .progress-fill.green {
+            background: linear-gradient(90deg, #38a169, #48bb78);
+        }
+
+        .progress-fill.blue {
+            background: linear-gradient(90deg, #3182ce, #4299e1);
+        }
+
+        .progress-fill.orange {
+            background: linear-gradient(90deg, #dd6b20, #ed8936);
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            bottom: 20px;
+            right: 30px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .nav button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .nav .prev {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .nav .next {
+            background: var(--primary);
+            color: white;
+        }
+
+        .nav button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .slide-indicator {
+            position: fixed;
+            bottom: 25px;
+            left: 30px;
+            font-size: 0.85em;
+            color: var(--muted);
+            z-index: 100;
+        }
+
+        /* Citation style */
+        .cite {
+            font-size: 0.75em;
+            color: var(--muted);
+            vertical-align: super;
+        }
+
+        /* Three column for lit review */
+        .three-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 25px;
+        }
+
+        .paper-card {
+            background: var(--light);
+            border-radius: 8px;
+            padding: 18px;
+            border-top: 3px solid var(--primary);
+        }
+
+        .paper-card.accent {
+            border-top-color: var(--accent);
+        }
+
+        .paper-card h4 {
+            font-size: 0.95em;
+            color: var(--primary);
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .paper-card p {
+            font-size: 0.85em;
+            color: var(--muted);
+            line-height: 1.4;
+        }
+
+        .paper-card .tag {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.7em;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .paper-card .tag.red {
+            background: var(--accent);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ============ SLIDE 1: TITLE ============ -->
+    <div class="slide title-slide active" id="s1">
+        <h1>Selective Machine Unlearning with<br>Information-Theoretic Auditing</h1>
+        <div class="subtitle">A Unified Framework for Privacy-Certified Forgetting</div>
+        <div class="authors"><strong>Vedant Jawandhia</strong></div>
+        <div class="affiliation">BITS Pilani, Hyderabad Campus<br>Department of Computer Science</div>
+        <div class="date">February 2026 — Mid-Semester Viva</div>
+    </div>
+
+    <!-- ============ SLIDE 2: PROBLEM & MOTIVATION ============ -->
+    <div class="slide" id="s2">
+        <div class="slide-header">
+            <div class="slide-number">1</div>
+            <h2>Problem Statement & Motivation</h2>
+        </div>
+        <div class="content">
+            <ul>
+                <li><strong>GDPR's "Right to be Forgotten"</strong> requires organizations to delete personal data from
+                    ML models upon user request</li>
+                <li><strong>Naïve solution:</strong> Retrain from scratch — prohibitively expensive for large models
+                    (hours to days)</li>
+                <li><strong>Approximate unlearning</strong> modifies model weights to "forget" specific data — but
+                    <em>how do we certify it actually worked?</em></li>
+            </ul>
+
+            <div class="highlight-box red" style="margin-top: 25px;">
+                <strong>Core Research Question:</strong> Can we build a unified unlearning framework that operates at
+                both class-level and sample-level, AND rigorously audit whether information has been truly removed using
+                information-theoretic metrics?
+            </div>
+
+            <ul style="margin-top: 20px;">
+                <li><strong>Two-pronged approach:</strong> (1) A novel unlearning method (IWEUP v2) + (2) A PID-based
+                    auditing framework using Residual Knowledge (I∩)</li>
+                <li><strong>Key insight:</strong> Traditional metrics like Forget Accuracy are misleading — a model can
+                    change predictions without removing memorized information</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ============ SLIDE 3: LITERATURE REVIEW ============ -->
+    <div class="slide" id="s3">
+        <div class="slide-header">
+            <div class="slide-number">2</div>
+            <h2>Literature Review</h2>
+        </div>
+        <div class="content">
+            <div class="three-col">
+                <div class="paper-card">
+                    <h4>Exact Unlearning</h4>
+                    <p><strong>SISA</strong> (Bourtoule et al., 2021) — Shards training data; retrains only the affected
+                        shard. Exact guarantees but impractical at scale.</p>
+                    <p style="margin-top:6px"><strong>Certified Removal</strong> (Ginart et al., 2019) — Newton
+                        step-based removal. Limited to convex models.</p>
+                    <div class="tag">Foundation</div>
+                </div>
+
+                <div class="paper-card">
+                    <h4>Approximate Unlearning</h4>
+                    <p><strong>Gradient Ascent</strong> (Thudi et al., 2022) — Maximize loss on forget set. Unstable.
+                    </p>
+                    <p style="margin-top:6px"><strong>SCRUB</strong> (Kurmanji et al., 2023) — Student-teacher
+                        distillation. High variance.</p>
+                    <p style="margin-top:6px"><strong>SalUn</strong> (Fan et al., 2024) — Saliency masks for selective
+                        weight updates.</p>
+                    <p style="margin-top:6px"><strong>Bad Teacher / Amnesiac</strong> — KD and gradient subtraction
+                        approaches.</p>
+                    <div class="tag">Baselines (7 methods)</div>
+                </div>
+
+                <div class="paper-card accent">
+                    <h4>Auditing Unlearning</h4>
+                    <p><strong>EACL 2026</strong> (Mazzetto et al.) — Information Decomposition for LLM unlearning using
+                        PID and RINE estimator.</p>
+                    <p style="margin-top:6px"><strong>Key metric:</strong> Residual Knowledge (I∩) — shared information
+                        between base and unlearned model.</p>
+                    <p style="margin-top:6px"><strong>Our adaptation:</strong> First application to CNN-based (ResNet)
+                        unlearning.</p>
+                    <div class="tag red">Our Innovation</div>
+                </div>
+            </div>
+
+            <div class="highlight-box" style="margin-top: 20px;">
+                <strong>Gap identified:</strong> No prior work combines (1) a unified class+sample-level unlearning
+                method with (2) information-theoretic auditing for vision models.
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ SLIDE 4: OBJECTIVES ============ -->
+    <div class="slide" id="s4">
+        <div class="slide-header">
+            <div class="slide-number">3</div>
+            <h2>Research Objectives</h2>
+        </div>
+        <div class="content">
+            <ul>
+                <li><strong>Objective 1:</strong> Design a unified unlearning framework (IWEUP v2) that handles both
+                    class-level and sample-level forgetting with a single architecture</li>
+                <li><strong>Objective 2:</strong> Adapt the Partial Information Decomposition (PID) framework to build a
+                    representation-level auditing system for CNN-based unlearning</li>
+                <li><strong>Objective 3:</strong> Develop a stress-test protocol using difficulty-ranked forget sets
+                    (easy, hard, random) to evaluate unlearning robustness</li>
+                <li><strong>Objective 4:</strong> Benchmark against 7 baselines on CIFAR-10/100 using both traditional
+                    metrics (MIA, accuracy) and information-theoretic metrics (I∩)</li>
+                <li><strong>Objective 5:</strong> Demonstrate that I∩ is a more reliable auditing signal than Forget
+                    Accuracy for certifying unlearning compliance</li>
+            </ul>
+
+            <div class="highlight-box" style="margin-top: 25px;">
+                <strong>Novelty Target:</strong> We are the first to (1) apply PID-based auditing to vision model
+                unlearning, (2) introduce a stress-test protocol with I∩-ranked difficulty splits, and (3) empirically
+                prove that Forget Accuracy is a misleading metric.
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ SLIDE 5: NOVELTY ============ -->
+    <div class="slide" id="s5">
+        <div class="slide-header">
+            <div class="slide-number">4</div>
+            <h2>Novelty & Contributions</h2>
+        </div>
+        <div class="content">
+            <div class="two-col">
+                <div class="col">
+                    <h3>Unlearning Method (IWEUP v2)</h3>
+                    <ul>
+                        <li><strong>Unified framework</strong> — auto-adapts to class vs. sample-level forgetting</li>
+                        <li><strong>Maximum Entropy Regularization</strong> — stable target state (uniform predictions)
+                        </li>
+                        <li><strong>Three-component sample-level loss:</strong> Adaptive Confidence Reduction +
+                            Anti-Memorization + MIA-Fooling</li>
+                        <li><strong>Result:</strong> MIA = 0.000 on both datasets, matching retrain</li>
+                    </ul>
+                </div>
+                <div class="col">
+                    <h3>Auditing Framework (Novel)</h3>
+                    <ul>
+                        <li><strong>RINE estimator</strong> ported from LLMs → ResNet using hook-based activation
+                            extraction</li>
+                        <li><strong>Per-sample I∩ difficulty scoring</strong> — ranks how hard each sample is to forget
+                        </li>
+                        <li><strong>Stress-test protocol</strong> — 3 difficulty splits evaluate robustness</li>
+                        <li><strong>Key finding:</strong> ForgetAcc ≠ information removal. I∩ is the true signal</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="highlight-box red" style="margin-top: 20px;">
+                <strong>Headline Result:</strong> Fine-tune (ForgetAcc=49%) and Gradient Ascent (ForgetAcc=37%) have
+                <em>nearly identical</em> I∩ (0.193 vs 0.174) — proving Forget Accuracy measures behavioral change, not
+                information removal.
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ SLIDE 6: IMPLEMENTATION PROGRESS ============ -->
+    <div class="slide" id="s6">
+        <div class="slide-header">
+            <div class="slide-number">5</div>
+            <h2>Implementation Progress</h2>
+        </div>
+        <div class="content">
+            <div class="two-col">
+                <div class="col">
+                    <h3>Codebase (Complete ✅)</h3>
+                    <div class="progress-item">
+                        <div class="progress-label"><span>Core Framework (model, data, training)</span><span>100%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill green" style="width:100%"></div>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-label"><span>8 Unlearning Baselines</span><span>100%</span></div>
+                        <div class="progress-bar">
+                            <div class="progress-fill green" style="width:100%"></div>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-label"><span>Evaluation (MIA, metrics)</span><span>100%</span></div>
+                        <div class="progress-bar">
+                            <div class="progress-fill green" style="width:100%"></div>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-label"><span>Auditing Module (RINE, activation
+                                extraction)</span><span>100%</span></div>
+                        <div class="progress-bar">
+                            <div class="progress-fill green" style="width:100%"></div>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-label"><span>Stress-Test Protocol</span><span>100%</span></div>
+                        <div class="progress-bar">
+                            <div class="progress-fill green" style="width:100%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <h3>Experiments (Complete ✅)</h3>
+                    <div class="progress-item">
+                        <div class="progress-label"><span>CIFAR-10 Audit (3 seeds, 8 methods)</span><span>100%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill green" style="width:100%"></div>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-label"><span>CIFAR-100 Audit</span><span>100%</span></div>
+                        <div class="progress-bar">
+                            <div class="progress-fill green" style="width:100%"></div>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-label"><span>Stress Test (easy/hard/random)</span><span>100%</span></div>
+                        <div class="progress-bar">
+                            <div class="progress-fill green" style="width:100%"></div>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-label"><span>Paper Writing</span><span>80%</span></div>
+                        <div class="progress-bar">
+                            <div class="progress-fill blue" style="width:80%"></div>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-label"><span>Future Extensions (layer-wise I∩,
+                                adaptive)</span><span>0%</span></div>
+                        <div class="progress-bar">
+                            <div class="progress-fill orange" style="width:0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ SLIDE 7: KEY RESULTS ============ -->
+    <div class="slide" id="s7">
+        <div class="slide-header">
+            <div class="slide-number">6</div>
+            <h2>Key Results — Information Decomposition Audit</h2>
+        </div>
+        <div class="content">
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Method</th>
+                        <th>I∩ (bits) ↓</th>
+                        <th>ForgetAcc (%)</th>
+                        <th>TestAcc (%)</th>
+                        <th>MIA Risk</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="gold">
+                        <td>Retrain (Gold Standard)</td>
+                        <td>0.076 ± 0.009</td>
+                        <td>0.0</td>
+                        <td>85.2</td>
+                        <td>0.086</td>
+                    </tr>
+                    <tr>
+                        <td>Amnesiac</td>
+                        <td>0.083 ± 0.012</td>
+                        <td>0.7</td>
+                        <td>83.3</td>
+                        <td>0.147</td>
+                    </tr>
+                    <tr>
+                        <td>Bad Teacher</td>
+                        <td>0.092 ± 0.020</td>
+                        <td>15.7</td>
+                        <td>82.1</td>
+                        <td>0.107</td>
+                    </tr>
+                    <tr class="highlight">
+                        <td>IWEUP v2 (Ours)</td>
+                        <td><strong>0.122 ± 0.016</strong></td>
+                        <td>10.5</td>
+                        <td>83.4</td>
+                        <td>0.137</td>
+                    </tr>
+                    <tr>
+                        <td>SalUn</td>
+                        <td>0.146 ± 0.005</td>
+                        <td>0.0</td>
+                        <td>83.1</td>
+                        <td>0.130</td>
+                    </tr>
+                    <tr>
+                        <td>SCRUB</td>
+                        <td>0.157 ± 0.004</td>
+                        <td>63.0</td>
+                        <td>88.3</td>
+                        <td>0.136</td>
+                    </tr>
+                    <tr>
+                        <td>Gradient Ascent</td>
+                        <td>0.174 ± 0.002</td>
+                        <td>37.0</td>
+                        <td>87.3</td>
+                        <td>0.153</td>
+                    </tr>
+                    <tr>
+                        <td>Fine-tune</td>
+                        <td>0.193 ± 0.000</td>
+                        <td>49.2</td>
+                        <td>89.1</td>
+                        <td>0.168</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="highlight-box" style="margin-top: 15px;">
+                <strong>Stress Test:</strong> IWEUP v2 achieves I∩ = <strong>0.000</strong> across all three difficulty
+                splits (easy, random, hard) — the only method with zero residual knowledge regardless of sample
+                difficulty.
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ SLIDE 8: REPORT & PLAN ============ -->
+    <div class="slide" id="s8">
+        <div class="slide-header">
+            <div class="slide-number">7</div>
+            <h2>Report Progress & Plan of Action</h2>
+        </div>
+        <div class="content">
+            <div class="two-col">
+                <div class="col">
+                    <h3>Report Writing Progress</h3>
+                    <ul>
+                        <li><strong>Complete:</strong> Abstract, Introduction, Related Work, Methodology, Experimental
+                            Setup, Results (class-level, sample-level, audit)</li>
+                        <li><strong>Complete:</strong> 5 publication-quality figures (bar charts, scatter plots, radar
+                            chart)</li>
+                        <li><strong>Complete:</strong> 7 results tables with multi-seed statistics</li>
+                        <li><strong>In progress:</strong> Discussion refinement, future work section</li>
+                        <li><strong>Format:</strong> ACL-style LaTeX, targeting arXiv submission</li>
+                    </ul>
+                </div>
+                <div class="col">
+                    <h3>Plan of Action (Next 2-3 Months)</h3>
+                    <ul>
+                        <li><strong>March:</strong> Layer-wise I∩ analysis — identify WHERE residual information
+                            persists in the network</li>
+                        <li><strong>March:</strong> I∩ vs MIA correlation analysis — formal empirical bound</li>
+                        <li><strong>April:</strong> I∩-guided adaptive unlearning — use I∩ as a stopping criterion
+                            during training</li>
+                        <li><strong>April:</strong> Nonlinear RINE (MLP probes) for tighter auditing</li>
+                        <li><strong>May:</strong> Final paper revision and arXiv submission</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="highlight-box" style="margin-top: 20px;">
+                <strong>Summary:</strong> All core implementation and experiments are complete. The next phase focuses
+                on deepening the auditing contribution with novel extensions (layer-wise analysis, adaptive unlearning,
+                formal bounds).
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ SLIDE 9: THANK YOU ============ -->
+    <div class="slide" id="s9"
+        style="background: linear-gradient(135deg, #1a365d 0%, #2c5282 50%, #2b6cb0 100%); color: white; justify-content: center; align-items: center; text-align: center;">
+        <h1 style="font-family: 'Crimson Pro', serif; font-size: 3em; margin-bottom: 30px;">Thank You</h1>
+        <p style="font-size: 1.3em; opacity: 0.9; margin-bottom: 10px;">Questions & Discussion</p>
+        <p style="font-size: 1.0em; opacity: 0.7; margin-top: 30px;">
+            Code: github.com/vedantjawandhia/selective_unlearning<br>
+            Paper: In preparation for arXiv
+        </p>
+    </div>
+
+    <!-- ============ NAVIGATION ============ -->
+    <div class="slide-indicator">
+        <span id="slideNum">1</span> / <span id="totalSlides">9</span>
+    </div>
+
+    <div class="nav">
+        <button class="prev" onclick="changeSlide(-1)">← Previous</button>
+        <button class="next" onclick="changeSlide(1)">Next →</button>
+    </div>
+
+    <script>
+        let current = 0;
+        const slides = document.querySelectorAll('.slide');
+        const total = slides.length;
+        document.getElementById('totalSlides').textContent = total;
+
+        function showSlide(n) {
+            slides.forEach(s => s.classList.remove('active'));
+            current = ((n % total) + total) % total;
+            slides[current].classList.add('active');
+            document.getElementById('slideNum').textContent = current + 1;
+        }
+
+        function changeSlide(dir) { showSlide(current + dir); }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') { e.preventDefault(); changeSlide(1); }
+            if (e.key === 'ArrowLeft' || e.key === 'Backspace') { e.preventDefault(); changeSlide(-1); }
+            if (e.key === 'Home') showSlide(0);
+            if (e.key === 'End') showSlide(total - 1);
+        });
+
+        // Fullscreen on F11 or double-click
+        document.addEventListener('dblclick', () => {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        });
+    </script>
+
+</body>
+
+</html>
