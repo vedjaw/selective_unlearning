@@ -4,3 +4,4 @@ Hoang_Learn_To_Unlearn_for_Deep_Neural_Networks_Minimizing_Unlearning_Interferen
 pyproject.json
 *.png
 tests
+.DS_Store
