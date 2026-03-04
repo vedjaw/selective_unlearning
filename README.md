@@ -111,18 +111,4 @@ python experiments/exp_class_unlearning.py \
 - PyTorch >= 2.0
 - CUDA (optional, for GPU acceleration)
 
-## Citation
 
-If you use this framework in your research, please cite:
-
-```bibtex
-@article{jawandhia2025igtu,
-  title={Influence-Guided Targeted Unlearning for Neural Networks},
-  author={Jawandhia, Vedant},
-  year={2025}
-}
-```
-
-## License
-
-MIT License
