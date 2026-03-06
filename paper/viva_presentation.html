@@ -377,9 +377,10 @@
     <div class="slide title-slide active" id="s1">
         <h1>Selective Machine Unlearning with<br>Information-Theoretic Auditing</h1>
         <div class="subtitle">A Unified Framework for Privacy-Certified Forgetting</div>
+        <div class="authors"><strong>Chavi Gupta</strong></div>
+        <div class="authors"><strong>Daksh Ahuja</strong></div>
+        <div class="authors"><strong>Samyak Savi</strong></div>
         <div class="authors"><strong>Vedant Jawandhia</strong></div>
-        <div class="affiliation">BITS Pilani, Hyderabad Campus<br>Department of Computer Science</div>
-        <div class="date">February 2026 — Mid-Semester Viva</div>
     </div>
 
     <!-- ============ SLIDE 2: PROBLEM & MOTIVATION ============ -->
@@ -395,7 +396,8 @@
                 <li><strong>Naïve solution:</strong> Retrain from scratch — prohibitively expensive for large models
                     (hours to days)</li>
                 <li><strong>Approximate unlearning</strong> modifies model weights to "forget" specific data — but
-                    <em>how do we certify it actually worked?</em></li>
+                    <em>how do we certify it actually worked?</em>
+                </li>
             </ul>
 
             <div class="highlight-box red" style="margin-top: 25px;">
@@ -539,7 +541,7 @@
         <div class="content">
             <div class="two-col">
                 <div class="col">
-                    <h3>Codebase (Complete ✅)</h3>
+                    <h3>Codebase</h3>
                     <div class="progress-item">
                         <div class="progress-label"><span>Core Framework (model, data, training)</span><span>100%</span>
                         </div>
@@ -548,56 +550,56 @@
                         </div>
                     </div>
                     <div class="progress-item">
-                        <div class="progress-label"><span>8 Unlearning Baselines</span><span>100%</span></div>
+                        <div class="progress-label"><span>Unlearning Baselines (6/8 done)</span><span>75%</span></div>
                         <div class="progress-bar">
-                            <div class="progress-fill green" style="width:100%"></div>
+                            <div class="progress-fill green" style="width:75%"></div>
                         </div>
                     </div>
                     <div class="progress-item">
-                        <div class="progress-label"><span>Evaluation (MIA, metrics)</span><span>100%</span></div>
+                        <div class="progress-label"><span>Evaluation (MIA, metrics)</span><span>80%</span></div>
                         <div class="progress-bar">
-                            <div class="progress-fill green" style="width:100%"></div>
+                            <div class="progress-fill blue" style="width:80%"></div>
                         </div>
                     </div>
                     <div class="progress-item">
                         <div class="progress-label"><span>Auditing Module (RINE, activation
-                                extraction)</span><span>100%</span></div>
+                                extraction)</span><span>45%</span></div>
                         <div class="progress-bar">
-                            <div class="progress-fill green" style="width:100%"></div>
+                            <div class="progress-fill blue" style="width:45%"></div>
                         </div>
                     </div>
                     <div class="progress-item">
-                        <div class="progress-label"><span>Stress-Test Protocol</span><span>100%</span></div>
+                        <div class="progress-label"><span>Stress-Test Protocol</span><span>20%</span></div>
                         <div class="progress-bar">
-                            <div class="progress-fill green" style="width:100%"></div>
+                            <div class="progress-fill orange" style="width:20%"></div>
                         </div>
                     </div>
                 </div>
                 <div class="col">
-                    <h3>Experiments (Complete ✅)</h3>
+                    <h3>Experiments & Writing</h3>
                     <div class="progress-item">
-                        <div class="progress-label"><span>CIFAR-10 Audit (3 seeds, 8 methods)</span><span>100%</span>
+                        <div class="progress-label"><span>CIFAR-10 Benchmark (initial runs)</span><span>60%</span>
                         </div>
                         <div class="progress-bar">
-                            <div class="progress-fill green" style="width:100%"></div>
-                        </div>
-                    </div>
-                    <div class="progress-item">
-                        <div class="progress-label"><span>CIFAR-100 Audit</span><span>100%</span></div>
-                        <div class="progress-bar">
-                            <div class="progress-fill green" style="width:100%"></div>
+                            <div class="progress-fill blue" style="width:60%"></div>
                         </div>
                     </div>
                     <div class="progress-item">
-                        <div class="progress-label"><span>Stress Test (easy/hard/random)</span><span>100%</span></div>
+                        <div class="progress-label"><span>CIFAR-100 Extension</span><span>10%</span></div>
                         <div class="progress-bar">
-                            <div class="progress-fill green" style="width:100%"></div>
+                            <div class="progress-fill orange" style="width:10%"></div>
                         </div>
                     </div>
                     <div class="progress-item">
-                        <div class="progress-label"><span>Paper Writing</span><span>80%</span></div>
+                        <div class="progress-label"><span>Stress Test (easy/hard/random)</span><span>15%</span></div>
                         <div class="progress-bar">
-                            <div class="progress-fill blue" style="width:80%"></div>
+                            <div class="progress-fill orange" style="width:15%"></div>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-label"><span>Paper Writing</span><span>30%</span></div>
+                        <div class="progress-bar">
+                            <div class="progress-fill orange" style="width:30%"></div>
                         </div>
                     </div>
                     <div class="progress-item">
@@ -708,33 +710,30 @@
                 <div class="col">
                     <h3>Report Writing Progress</h3>
                     <ul>
-                        <li><strong>Complete:</strong> Abstract, Introduction, Related Work, Methodology, Experimental
-                            Setup, Results (class-level, sample-level, audit)</li>
-                        <li><strong>Complete:</strong> 5 publication-quality figures (bar charts, scatter plots, radar
-                            chart)</li>
-                        <li><strong>Complete:</strong> 7 results tables with multi-seed statistics</li>
-                        <li><strong>In progress:</strong> Discussion refinement, future work section</li>
-                        <li><strong>Format:</strong> ACL-style LaTeX, targeting arXiv submission</li>
+                        <li><strong>Drafted:</strong> Introduction, Related Work, initial Methodology section</li>
+                        <li><strong>In progress:</strong> Experimental setup, preliminary results writeup</li>
+                        <li><strong>Planned:</strong> Auditing results, discussion, figures, conclusion</li>
+                        <li><strong>Format:</strong> ACL-style LaTeX template set up</li>
                     </ul>
                 </div>
                 <div class="col">
                     <h3>Plan of Action (Next 2-3 Months)</h3>
                     <ul>
-                        <li><strong>March:</strong> Layer-wise I∩ analysis — identify WHERE residual information
-                            persists in the network</li>
-                        <li><strong>March:</strong> I∩ vs MIA correlation analysis — formal empirical bound</li>
-                        <li><strong>April:</strong> I∩-guided adaptive unlearning — use I∩ as a stopping criterion
-                            during training</li>
-                        <li><strong>April:</strong> Nonlinear RINE (MLP probes) for tighter auditing</li>
-                        <li><strong>May:</strong> Final paper revision and arXiv submission</li>
+                        <li><strong>March:</strong> Complete remaining baselines (SalUn, Amnesiac) &amp; finalize
+                            CIFAR-10 benchmark</li>
+                        <li><strong>March:</strong> Build out auditing module — finish RINE estimator &amp; difficulty
+                            scoring</li>
+                        <li><strong>April:</strong> Run CIFAR-100 extension &amp; stress-test protocol</li>
+                        <li><strong>April:</strong> Layer-wise I∩ analysis &amp; I∩-guided adaptive unlearning</li>
+                        <li><strong>May:</strong> Complete paper writing, figures, and target arXiv submission</li>
                     </ul>
                 </div>
             </div>
 
             <div class="highlight-box" style="margin-top: 20px;">
-                <strong>Summary:</strong> All core implementation and experiments are complete. The next phase focuses
-                on deepening the auditing contribution with novel extensions (layer-wise analysis, adaptive unlearning,
-                formal bounds).
+                <strong>Summary:</strong> Core infrastructure and majority of baselines are implemented. Initial
+                CIFAR-10 results are promising. The next phase will complete the auditing framework, run full
+                experiments, and write up findings.
             </div>
         </div>
     </div>
